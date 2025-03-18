@@ -8,18 +8,37 @@ import (
 	"github.com/itmrchow/todolist-system/utils"
 )
 
-var validate *validator.Validate
+var _ UserHandlerInterface = &UserHandler{}
 
-func RegisterUser(w http.ResponseWriter, r *http.Request) {
+type UserHandler struct {
+	validate *validator.Validate
+}
+
+func NewUserHandler(validate *validator.Validate) *UserHandler {
+	return &UserHandler{
+		validate: validate,
+	}
+}
+
+func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req RegisterUserReqDTO
 	err := utils.DecodeJSONBody(r, &req)
 	if err != nil {
 		// 400
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	err = validate.Struct(req)
+	err = u.validate.Struct(req)
 	if err != nil {
 		// 400
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
+	// 201
+}
+
+func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	panic("TODO: Implement")
 }
