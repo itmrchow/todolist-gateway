@@ -1,25 +1,8 @@
 package handlers
 
 import (
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
-
-func RegisterHandlers() (router *mux.Router) {
-	router = mux.NewRouter()
-	// middleware
-
-	// validate
-	validate := validator.New()
-	userHandler := NewUserHandler(validate)
-	taskHandler := NewTaskHandler(validate)
-
-	// router
-	RegisterUserRouter(router, userHandler)
-	RegisterTaskRouter(router, taskHandler)
-
-	return
-}
 
 func RegisterUserRouter(r *mux.Router, userHandler *UserHandler) {
 	r.HandleFunc("/users/register", userHandler.RegisterUser).Methods("POST")
