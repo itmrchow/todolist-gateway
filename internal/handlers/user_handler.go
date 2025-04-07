@@ -6,8 +6,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/itmrchow/todolist-proto/protobuf/user"
 
-	"github.com/itmrchow/todolist-system/internal/service"
-	"github.com/itmrchow/todolist-system/utils"
+	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
+	"github.com/itmrchow/todolist-gateway/internal/service"
+	"github.com/itmrchow/todolist-gateway/utils"
 )
 
 var _ UserHandlerInterface = &UserHandler{}
@@ -30,7 +31,7 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	err := utils.DecodeJSONBody(r, &req)
 	if err != nil {
-		resp.Message = ErrMsg400BadRequest
+		resp.Message = mErr.ErrMsg400BadRequest
 		resp.Data = err.Error()
 
 		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
@@ -40,7 +41,7 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	err = u.validate.Struct(req)
 	if err != nil {
 		// 400
-		resp.Message = ErrMsg400BadRequest
+		resp.Message = mErr.ErrMsg400BadRequest
 
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
 			var errors []map[string]string
@@ -60,7 +61,7 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	// call rpc service
 	client, err := u.userSvc.NewClient()
 	if err != nil {
-		resp.Message = ErrMsg500InternalServerError
+		resp.Message = mErr.ErrMsg500InternalServerError
 		resp.Data = err.Error()
 
 		utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
@@ -73,7 +74,7 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		Name:     req.Name,
 	})
 	if err != nil {
-		resp.Message = ErrMsg500InternalServerError
+		resp.Message = mErr.ErrMsg500InternalServerError
 		resp.Data = err.Error()
 
 		utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
