@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/itmrchow/todolist-proto/protobuf/user"
 
+	"github.com/itmrchow/todolist-gateway/internal/dto"
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
 	"github.com/itmrchow/todolist-gateway/internal/service"
 	"github.com/itmrchow/todolist-gateway/utils"
@@ -26,8 +27,9 @@ func NewUserHandler(validate *validator.Validate, userSvc *service.UserService) 
 }
 
 func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	var req RegisterUserReqDTO
-	var resp BaseRespDTO
+
+	var req dto.RegisterUserReqDTO
+	var resp dto.BaseRespDTO
 
 	err := utils.DecodeJSONBody(r, &req)
 	if err != nil {
