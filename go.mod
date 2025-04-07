@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/itmrchow/microservice-common v0.0.0-20250407044107-95f35cb46282
+	github.com/itmrchow/microservice-common v0.0.0-20250407080721-43c5a108615c
 	github.com/itmrchow/todolist-proto v0.0.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/viper v1.20.0
