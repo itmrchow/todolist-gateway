@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/itmrchow/todolist-system/infra"
-	"github.com/itmrchow/todolist-system/internal/handlers"
-	"github.com/itmrchow/todolist-system/internal/service"
+	"github.com/itmrchow/todolist-gateway/infra"
+	"github.com/itmrchow/todolist-gateway/internal/handlers"
+	"github.com/itmrchow/todolist-gateway/internal/service"
 )
 
 var (
