@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
-	github.com/itmrchow/todolist-proto v0.0.0-20250320092657-97a9f23f2ce1
+	github.com/itmrchow/todolist-proto v0.0.1
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
