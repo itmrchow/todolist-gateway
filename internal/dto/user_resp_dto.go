@@ -1,4 +1,4 @@
-package handlers
+package dto
 
 import (
 	"time"

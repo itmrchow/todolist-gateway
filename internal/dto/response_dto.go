@@ -1,4 +1,4 @@
-package handlers
+package dto
 
 type BaseRespDTO struct {
 	Message string      `json:"message"`
