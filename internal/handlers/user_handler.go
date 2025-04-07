@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/itmrchow/todolist-proto/protobuf/user"
-	"github.com/rs/zerolog/log"
 
 	"github.com/itmrchow/todolist-gateway/internal/dto"
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
@@ -33,29 +31,8 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserReqDTO
 	var resp dto.BaseRespDTO
 
-	err := utils.DecodeJSONBody(r, &req)
-	if err != nil {
-		resp.Message = mErr.ErrMsg400BadRequest
-		resp.Data = err.Error()
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
-		return
-	}
-
-	err = u.validate.Struct(req)
-	if err != nil {
-
-		var validationErrors validator.ValidationErrors
-		if errors.As(err, &validationErrors) {
-			// 400
-			resp.ValidatorErrorResp(err.(validator.ValidationErrors))
-		} else {
-			// 500
-			resp.Message = mErr.ErrMsg500InternalServerError
-			log.Error().Err(err).Str("trace_id", r.Header.Get("X-Trace-ID")).Msg("register user error")
-		}
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
+	// request handler
+	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
 		return
 	}
 
@@ -88,30 +65,10 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.LoginUserReqDTO
-	var resp dto.BaseRespDTO
+	// var resp dto.BaseRespDTO
 
-	err := utils.DecodeJSONBody(r, &req)
-	if err != nil {
-		resp.Message = mErr.ErrMsg400BadRequest
-		resp.Data = err.Error()
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
-		return
-	}
-
-	err = u.validate.Struct(req)
-	if err != nil {
-		var validationErrors validator.ValidationErrors
-		if errors.As(err, &validationErrors) {
-			// 400
-			resp.ValidatorErrorResp(err.(validator.ValidationErrors))
-		} else {
-			// 500
-			resp.Message = mErr.ErrMsg500InternalServerError
-			log.Error().Err(err).Str("trace_id", r.Header.Get("X-Trace-ID")).Msg("register user error")
-		}
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
+	// request handler
+	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
 		return
 	}
 
