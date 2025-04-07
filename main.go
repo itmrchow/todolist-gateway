@@ -12,6 +12,7 @@ import (
 
 	"github.com/itmrchow/todolist-gateway/infra"
 	"github.com/itmrchow/todolist-gateway/internal/handlers"
+	"github.com/itmrchow/todolist-gateway/internal/middleware"
 	"github.com/itmrchow/todolist-gateway/internal/service"
 )
 
@@ -60,6 +61,7 @@ func initRouter() {
 	router := mux.NewRouter()
 
 	// base middleware
+	router.Use(middleware.PanicRecover)
 	// TODO: trace id
 
 	// validate
