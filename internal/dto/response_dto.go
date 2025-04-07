@@ -1,7 +1,10 @@
 package dto
 
 import (
+	"net/http"
+
 	"github.com/go-playground/validator/v10"
+	"github.com/rs/zerolog/log"
 
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
 )
@@ -21,6 +24,14 @@ func (resp *BaseRespDTO) ValidatorErrorResp(err validator.ValidationErrors) {
 	}
 	resp.Message = mErr.ErrMsg400BadRequest
 	resp.Data = errors // 將所有驗證錯誤信息放入
+}
+
+func (resp *BaseRespDTO) InternalErrorResp(r *http.Request, err error) {
+	log.Error().Err(err).
+		Str("trace_id", r.Header.Get("X-Trace-ID")).
+		Msg("service internal error")
+
+	resp.Message = mErr.ErrMsg500InternalServerError
 }
 
 // type FailedRespDTO struct {

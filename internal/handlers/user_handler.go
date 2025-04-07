@@ -5,6 +5,8 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/itmrchow/todolist-proto/protobuf/user"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/itmrchow/todolist-gateway/internal/dto"
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
@@ -36,12 +38,10 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// call rpc service
+	// rpc service
 	client, err := u.userSvc.NewClient()
 	if err != nil {
-		resp.Message = mErr.ErrMsg500InternalServerError
-		resp.Data = err.Error()
-
+		resp.InternalErrorResp(r, err)
 		utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
 		return
 	}
@@ -52,6 +52,20 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		Name:     req.Name,
 	})
 	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.AlreadyExists:
+				resp.Message = mErr.ErrMsg409Conflict
+				resp.Data = s.Message()
+				utils.ResponseWriter(r, w, http.StatusConflict, resp) // 409
+				return
+			}
+		} else {
+			resp.InternalErrorResp(r, err)
+			utils.ResponseWriter(r, w, http.StatusConflict, resp) // 409
+			return
+		}
+
 		resp.Message = mErr.ErrMsg500InternalServerError
 		resp.Data = err.Error()
 
