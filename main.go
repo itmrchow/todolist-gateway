@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/itmrchow/todolist-system/infra"
 	"github.com/itmrchow/todolist-system/internal/handlers"
 	"github.com/itmrchow/todolist-system/internal/service"
 )
@@ -25,21 +26,18 @@ func main() {
 }
 
 func initConfig() {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
-
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal().Err(err).Msg("config init error")
+	err := infra.InitConfig()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to init config")
 	}
 
-	log.Info().Msgf("config init success")
+	log.Info().Msg("config loaded")
 }
 
 func initSubServices() {
 	var (
-		userLocation = viper.GetString("grpc.user.location")
-		// taskLocation = ""
+		userLocation = viper.GetString("GRPC_USER_LOCATION")
+		// taskLocation = viper.GetString("GRPC_TASK_LOCATION")
 	)
 
 	// grpc svc
@@ -55,7 +53,7 @@ func initSubServices() {
 
 func initRouter() {
 	var (
-		port = viper.GetString("server.port")
+		port = viper.GetString("SERVER_PORT")
 	)
 
 	// router
