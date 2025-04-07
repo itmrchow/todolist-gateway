@@ -61,6 +61,7 @@ func initRouter() {
 	router := mux.NewRouter()
 
 	// base middleware
+	router.Use(middleware.Trace)
 	router.Use(middleware.PanicRecover)
 	// TODO: trace id
 
