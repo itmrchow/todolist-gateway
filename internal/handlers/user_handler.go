@@ -10,21 +10,20 @@ import (
 
 	"github.com/itmrchow/todolist-gateway/internal/dto"
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
-	"github.com/itmrchow/todolist-gateway/internal/service"
 	"github.com/itmrchow/todolist-gateway/utils"
 )
 
 var _ UserHandlerInterface = &UserHandler{}
 
 type UserHandler struct {
-	validate *validator.Validate
-	userSvc  *service.UserService
+	validate   *validator.Validate
+	userClient user.UserServiceClient
 }
 
-func NewUserHandler(validate *validator.Validate, userSvc *service.UserService) *UserHandler {
+func NewUserHandler(validate *validator.Validate, userClient user.UserServiceClient) *UserHandler {
 	return &UserHandler{
-		validate: validate,
-		userSvc:  userSvc,
+		validate:   validate,
+		userClient: userClient,
 	}
 }
 
@@ -38,15 +37,7 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// rpc service
-	client, err := u.userSvc.NewClient()
-	if err != nil {
-		resp.InternalErrorResp(r, err)
-		utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
-		return
-	}
-
-	_, err = client.Register(r.Context(), &user.RegisterRequest{
+	_, err := u.userClient.Register(r.Context(), &user.RegisterRequest{
 		Email:    req.Email,
 		Password: req.Password,
 		Name:     req.Name,
@@ -58,18 +49,16 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 				resp.Message = mErr.ErrMsg409Conflict
 				resp.Data = s.Message()
 				utils.ResponseWriter(r, w, http.StatusConflict, resp) // 409
-				return
+			default:
+				resp.InternalErrorResp(r, err)
+				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
 			}
 		} else {
 			resp.InternalErrorResp(r, err)
-			utils.ResponseWriter(r, w, http.StatusConflict, resp) // 409
-			return
+			utils.ResponseWriter(r, w, http.StatusConflict, resp) // 500
+
 		}
-
-		resp.Message = mErr.ErrMsg500InternalServerError
-		resp.Data = err.Error()
-
-		utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
+		return
 	}
 
 	// 201

@@ -68,8 +68,14 @@ func initRouter() {
 	// validate
 	validate := validator.New()
 
+	// get client
+	userClient, err := userSvc.NewClient()
+	if err != nil {
+		log.Fatal().Err(err).Msg("init user service error")
+	}
+
 	// handlers
-	userHandler := handlers.NewUserHandler(validate, userSvc)
+	userHandler := handlers.NewUserHandler(validate, userClient)
 	taskHandler := handlers.NewTaskHandler(validate)
 
 	// router
