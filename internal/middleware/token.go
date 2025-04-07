@@ -8,7 +8,9 @@ import (
 	"github.com/itmrchow/microservice-common/token"
 	"github.com/spf13/viper"
 
-	handlers "github.com/itmrchow/todolist-gateway/internal/errors"
+	"github.com/itmrchow/todolist-gateway/internal/dto"
+	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
+	"github.com/itmrchow/todolist-gateway/utils"
 )
 
 func ValidateToken(next http.Handler) http.Handler {
@@ -22,13 +24,16 @@ func ValidateToken(next http.Handler) http.Handler {
 		userID, err := token.ValidateToken(tokenString, secretKey, issuer)
 
 		if err != nil {
+			var resp dto.BaseRespDTO
+
 			if errors.Is(err, token.ErrExpiredToken) {
-				http.Error(w, handlers.ErrMsg401TokenExpired, http.StatusUnauthorized)
-				return
+				resp.Message = mErr.ErrMsg401TokenExpired
 			} else {
-				http.Error(w, handlers.ErrMsg401TokenInvalid, http.StatusUnauthorized)
-				return
+				resp.Message = mErr.ErrMsg401TokenInvalid
 			}
+
+			utils.ResponseWriter(r, w, http.StatusUnauthorized, resp)
+			return
 		}
 
 		r.Header.Set("X-User-ID", userID)
