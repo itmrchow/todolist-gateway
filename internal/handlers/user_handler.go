@@ -31,32 +31,8 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var req dto.RegisterUserReqDTO
 	var resp dto.BaseRespDTO
 
-	err := utils.DecodeJSONBody(r, &req)
-	if err != nil {
-		resp.Message = mErr.ErrMsg400BadRequest
-		resp.Data = err.Error()
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
-		return
-	}
-
-	err = u.validate.Struct(req)
-	if err != nil {
-		// 400
-		resp.Message = mErr.ErrMsg400BadRequest
-
-		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			var errors []map[string]string
-			for _, fieldError := range validationErrors {
-				errors = append(errors, map[string]string{
-					"key":   fieldError.Field(),
-					"error": fieldError.Tag(),
-				})
-			}
-			resp.Data = errors // 將所有驗證錯誤信息放入
-		}
-
-		utils.ResponseWriter(r, w, http.StatusBadRequest, resp)
+	// request handler
+	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
 		return
 	}
 
@@ -87,5 +63,14 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+
+	var req dto.LoginUserReqDTO
+	// var resp dto.BaseRespDTO
+
+	// request handler
+	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
+		return
+	}
+
 	panic("TODO: Implement")
 }
