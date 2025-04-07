@@ -5,10 +5,13 @@ import (
 	"runtime/debug"
 
 	"github.com/rs/zerolog/log"
+
+	"github.com/itmrchow/todolist-gateway/internal/dto"
+	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
+	"github.com/itmrchow/todolist-gateway/utils"
 )
 
 func PanicRecover(next http.Handler) http.Handler {
-
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -21,7 +24,11 @@ func PanicRecover(next http.Handler) http.Handler {
 					Msg("panic")
 
 				// response
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				resp := dto.BaseRespDTO{
+					Message: mErr.ErrMsg500InternalServerError,
+				}
+
+				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
 			}
 		}()
 
