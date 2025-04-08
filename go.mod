@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/itmrchow/microservice-common v0.0.0-20250407080721-43c5a108615c
-	github.com/itmrchow/todolist-proto v0.0.1
+	github.com/itmrchow/todolist-proto v0.0.2-0.20250408061722-e13539eab329
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/viper v1.20.0
 	github.com/stretchr/testify v1.10.0
@@ -32,6 +32,7 @@ require (
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect

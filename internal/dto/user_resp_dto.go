@@ -2,12 +2,10 @@ package dto
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
-type RegisterUserRespDTO struct {
-	ID        uuid.UUID `json:"id"`
+type LoginUserRespDTO struct {
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Email     string    `json:"email"`
 	Token     string    `json:"token"`

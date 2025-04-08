@@ -8,12 +8,14 @@ import (
 	"testing"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/itmrchow/todolist-proto/protobuf/user"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUserHandler_RegisterUser(t *testing.T) {
+func TestRegisterUser(t *testing.T) {
 
 	validate := validator.New()
+	mockUserClient := user.NewMockUserServiceClient(t)
 
 	type args struct {
 		w http.ResponseWriter
@@ -87,7 +89,8 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			u := &UserHandler{
-				validate: validate,
+				validate:   validate,
+				userClient: mockUserClient,
 			}
 			u.RegisterUser(tt.args.w, tt.args.r)
 			tt.assertFunc(t, tt.args.w)

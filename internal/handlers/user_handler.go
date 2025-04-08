@@ -56,7 +56,6 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		} else {
 			resp.InternalErrorResp(r, err)
 			utils.ResponseWriter(r, w, http.StatusConflict, resp) // 500
-
 		}
 		return
 	}
@@ -68,12 +67,46 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.LoginUserReqDTO
-	// var resp dto.BaseRespDTO
+	var resp dto.BaseRespDTO
 
 	// request handler
 	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
 		return
 	}
 
-	panic("TODO: Implement")
+	svcLoginResp, err := u.userClient.Login(r.Context(), &user.LoginRequest{
+		Email:    req.Email,
+		Password: req.Password,
+	})
+
+	if err != nil {
+		if s, ok := status.FromError(err); ok {
+			switch s.Code() {
+			case codes.Unauthenticated:
+				resp.Message = mErr.ErrMsg401AuthFailed
+				resp.Data = s.Message()
+				utils.ResponseWriter(r, w, http.StatusUnauthorized, resp) // 401
+
+			default:
+				resp.InternalErrorResp(r, err)
+				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
+			}
+		} else {
+			resp.InternalErrorResp(r, err)
+			utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
+		}
+
+		return
+	}
+
+	resp.Message = "SUCCESS"
+	resp.Data = dto.LoginUserRespDTO{
+		ID:        svcLoginResp.Id,
+		Name:      svcLoginResp.Name,
+		Email:     svcLoginResp.Email,
+		Token:     svcLoginResp.Token,
+		ExpiresIn: svcLoginResp.ExpiresIn.AsTime(),
+	}
+
+	utils.ResponseWriter(r, w, http.StatusOK, resp)
 }
