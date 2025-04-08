@@ -24,10 +24,7 @@ func PanicRecover(next http.Handler) http.Handler {
 					Msg("panic")
 
 				// response
-				resp := dto.BaseRespDTO{
-					Message: mErr.ErrMsg500InternalServerError,
-				}
-
+				resp := dto.NewErrorResponse(mErr.ErrMsg500InternalServerError, err.(error).Error())
 				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp)
 			}
 		}()

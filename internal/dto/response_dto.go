@@ -1,44 +1,56 @@
 package dto
 
 import (
-	"net/http"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
 
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
 )
 
-type BaseRespDTO struct {
-	Message string      `json:"message"`
-	Data    interface{} `json:"data,omitempty"`
+type BaseRespDTO[T any] struct {
+	Message string `json:"message"`
+	Data    T      `json:"data,omitempty"`
 }
 
-func (resp *BaseRespDTO) ValidatorErrorResp(err validator.ValidationErrors) {
-	var errors []map[string]string
+type FieldError struct {
+	Key   string `json:"key"`
+	Error string `json:"error"`
+}
+
+func NewFieldErrorRespDTO(err validator.ValidationErrors) (respDTO BaseRespDTO[[]FieldError]) {
+	respDTO.Message = mErr.ErrMsg400BadRequest
+
+	var errors []FieldError
 	for _, fieldError := range err {
-		errors = append(errors, map[string]string{
-			"key":   fieldError.Field(),
-			"error": fieldError.Tag(),
+		errors = append(errors, FieldError{
+			Key:   fieldError.Field(),
+			Error: fieldError.Tag(),
 		})
 	}
-	resp.Message = mErr.ErrMsg400BadRequest
-	resp.Data = errors // 將所有驗證錯誤信息放入
+
+	respDTO.Data = errors
+	return
 }
 
-func (resp *BaseRespDTO) InternalErrorResp(r *http.Request, err error) {
+func NewInternalErrorRespDTO(traceID string, err error) (respDTO BaseRespDTO[any]) {
 	log.Error().Err(err).
-		Str("trace_id", r.Header.Get("X-Trace-ID")).
+		Str("trace_id", traceID).
 		Msg("service internal error")
 
-	resp.Message = mErr.ErrMsg500InternalServerError
+	respDTO.Message = mErr.ErrMsg500InternalServerError
+	return
 }
 
-// type FailedRespDTO struct {
-// 	BaseRespDTO
-// 	Error string `json:"error"`
-// }
+func NewErrorResponse(message string, err string) (respDTO BaseRespDTO[string]) {
 
-// type SuccessRespDTO struct {
-// 	BaseRespDTO
-// }
+	respDTO.Message = message
+	respDTO.Data = err
+
+	return
+}
+
+func NewSuccessResponse[T any](data T) (respDTO BaseRespDTO[T]) {
+	respDTO.Message = "SUCCESS"
+	respDTO.Data = data
+	return
+}

@@ -30,7 +30,6 @@ func NewUserHandler(validate *validator.Validate, userClient user.UserServiceCli
 func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.RegisterUserReqDTO
-	var resp dto.BaseRespDTO
 
 	// request handler
 	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
@@ -46,16 +45,15 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		if s, ok := status.FromError(err); ok {
 			switch s.Code() {
 			case codes.AlreadyExists:
-				resp.Message = mErr.ErrMsg409Conflict
-				resp.Data = s.Message()
+				resp := dto.NewErrorResponse(mErr.ErrMsg409Conflict, s.Message())
 				utils.ResponseWriter(r, w, http.StatusConflict, resp) // 409
 			default:
-				resp.InternalErrorResp(r, err)
+				resp := dto.NewInternalErrorRespDTO(r.Header.Get("X-Trace-ID"), err)
 				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
 			}
 		} else {
-			resp.InternalErrorResp(r, err)
-			utils.ResponseWriter(r, w, http.StatusConflict, resp) // 500
+			resp := dto.NewInternalErrorRespDTO(r.Header.Get("X-Trace-ID"), err)
+			utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
 		}
 		return
 	}
@@ -67,7 +65,6 @@ func (u *UserHandler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	var req dto.LoginUserReqDTO
-	var resp dto.BaseRespDTO
 
 	// request handler
 	if err := utils.HandleRequest(r, w, &req, u.validate); err != nil {
@@ -83,30 +80,27 @@ func (u *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		if s, ok := status.FromError(err); ok {
 			switch s.Code() {
 			case codes.Unauthenticated:
-				resp.Message = mErr.ErrMsg401AuthFailed
-				resp.Data = s.Message()
+				resp := dto.NewErrorResponse(mErr.ErrMsg401AuthFailed, s.Message())
 				utils.ResponseWriter(r, w, http.StatusUnauthorized, resp) // 401
-
 			default:
-				resp.InternalErrorResp(r, err)
+				resp := dto.NewInternalErrorRespDTO(r.Header.Get("X-Trace-ID"), err)
 				utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
 			}
 		} else {
-			resp.InternalErrorResp(r, err)
+			resp := dto.NewInternalErrorRespDTO(r.Header.Get("X-Trace-ID"), err)
 			utils.ResponseWriter(r, w, http.StatusInternalServerError, resp) // 500
 		}
 
 		return
 	}
 
-	resp.Message = "SUCCESS"
-	resp.Data = dto.LoginUserRespDTO{
+	resp := dto.NewSuccessResponse(dto.LoginUserRespDTO{
 		ID:        svcLoginResp.Id,
 		Name:      svcLoginResp.Name,
 		Email:     svcLoginResp.Email,
 		Token:     svcLoginResp.Token,
 		ExpiresIn: svcLoginResp.ExpiresIn.AsTime(),
-	}
+	})
 
 	utils.ResponseWriter(r, w, http.StatusOK, resp)
 }

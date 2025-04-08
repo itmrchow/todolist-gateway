@@ -5,20 +5,19 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/rs/zerolog/log"
 
 	"github.com/itmrchow/todolist-gateway/internal/dto"
 	mErr "github.com/itmrchow/todolist-gateway/internal/errors"
 )
 
 func HandleRequest(r *http.Request, w http.ResponseWriter, req interface{}, validate *validator.Validate) error {
-	var resp dto.BaseRespDTO
 
 	// 解析請求體
 	if err := DecodeJSONBody(r, req); err != nil {
-		resp.Message = mErr.ErrMsg400BadRequest
-		resp.Data = err.Error()
+
+		resp := dto.NewErrorResponse(mErr.ErrMsg400BadRequest, err.Error())
 		ResponseWriter(r, w, http.StatusBadRequest, resp)
+
 		return err
 	}
 
@@ -26,14 +25,13 @@ func HandleRequest(r *http.Request, w http.ResponseWriter, req interface{}, vali
 	if err := validate.Struct(req); err != nil {
 		var validationErrors validator.ValidationErrors
 		if errors.As(err, &validationErrors) {
-			resp.ValidatorErrorResp(err.(validator.ValidationErrors))
+			resp := dto.NewFieldErrorRespDTO(err.(validator.ValidationErrors))
+			ResponseWriter(r, w, http.StatusBadRequest, resp)
 		} else {
-			resp.Message = mErr.ErrMsg500InternalServerError
-			log.Error().Err(err).
-				Str("trace_id", r.Header.Get("X-Trace-ID")).
-				Msg("request validation error")
+			resp := dto.NewInternalErrorRespDTO(r.Header.Get("X-Trace-ID"), err)
+			ResponseWriter(r, w, http.StatusInternalServerError, resp)
 		}
-		ResponseWriter(r, w, http.StatusBadRequest, resp)
+
 		return err
 	}
 

@@ -24,15 +24,15 @@ func ValidateToken(next http.Handler) http.Handler {
 		userID, err := token.ValidateToken(tokenString, secretKey, issuer)
 
 		if err != nil {
-			var resp dto.BaseRespDTO
 
 			if errors.Is(err, token.ErrExpiredToken) {
-				resp.Message = mErr.ErrMsg401TokenExpired
+				resp := dto.NewErrorResponse(mErr.ErrMsg401TokenExpired, err.Error())
+				utils.ResponseWriter(r, w, http.StatusUnauthorized, resp)
 			} else {
-				resp.Message = mErr.ErrMsg401TokenInvalid
+				resp := dto.NewErrorResponse(mErr.ErrMsg401TokenInvalid, err.Error())
+				utils.ResponseWriter(r, w, http.StatusUnauthorized, resp)
 			}
 
-			utils.ResponseWriter(r, w, http.StatusUnauthorized, resp)
 			return
 		}
 
